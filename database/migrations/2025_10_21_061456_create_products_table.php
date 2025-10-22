@@ -22,7 +22,7 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->decimal('sale_price', 10, 2)->nullable();
             $table->string('thumbnail_image');
-            $table->string('images')->nullable();
+            $table->json('images')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

@@ -15,7 +15,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Products',
-        href: '/dashboard/products',
+        href: '/admin/products',
         icon: ShoppingBag,
     },
 ];
