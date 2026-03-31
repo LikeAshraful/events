@@ -21,13 +21,16 @@ class EventController extends Controller
      * Display a listing of events by city.
      * Route: /events/{city}
      */
-    public function index(string $city): Response
+    public function index(?string $city = null): Response
     {
-        $events = $this->eventService->getEventsByCity(strtolower($city));
+        $parsedCity = $city ? strtolower($city) : null;
+        $events = $this->eventService->getEvents($parsedCity);
+        $availableCities = $this->eventService->getAvailableCities();
 
         return Inertia::render('Events/Index', [
-            'city' => ucfirst(strtolower($city)),
+            'city' => $city ? ucfirst($parsedCity) : null,
             'events' => $events,
+            'availableCities' => $availableCities,
         ]);
     }
 

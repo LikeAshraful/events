@@ -21,6 +21,7 @@ class Event extends Model
         'external_url',
         'status',
         'clicks',
+        'source',
     ];
 
     protected $casts = [

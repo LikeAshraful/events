@@ -23,11 +23,27 @@ class EventController extends Controller
     /**
      * Display a listing of the events.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $events = Event::latest()->paginate(10);
+        $query = Event::query();
+
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('start_datetime', '>=', $request->start_date);
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('start_datetime', '<=', $request->end_date);
+        }
+
+        $events = $query->latest()->paginate(10)->withQueryString();
+
         return Inertia::render('Admin/Events/Index', [
-            'events' => $events
+            'events' => $events,
+            'filters' => $request->only(['search', 'start_date', 'end_date']),
         ]);
     }
 

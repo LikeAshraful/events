@@ -12,15 +12,36 @@ class EventService
      * Get published and upcoming events for a specific city.
      * Caches the results for 10 minutes to improve performance.
      */
-    public function getEventsByCity(string $city)
+    public function getEvents(?string $city = null)
     {
-        $cacheKey = "events_city_{$city}";
+        $cacheKey = $city ? "events_city_{$city}" : "events_all";
 
         return Cache::remember($cacheKey, 600, function () use ($city) {
+            $query = Event::published()->upcoming();
+            
+            if ($city) {
+                $query->where('city', $city);
+            }
+
+            return $query->get();
+        });
+    }
+
+    /**
+     * Get a list of all distinct cities where events are hosted.
+     */
+    public function getAvailableCities()
+    {
+        return Cache::remember('events_available_cities', 600, function () {
             return Event::published()
-                ->upcoming()
-                ->where('city', $city)
-                ->get();
+                ->select('city')
+                ->distinct()
+                ->orderBy('city')
+                ->pluck('city')
+                ->map(fn($c) => ucfirst(strtolower((string)$c)))
+                ->filter()
+                ->values()
+                ->toArray();
         });
     }
 
@@ -111,8 +132,12 @@ class EventService
     /**
      * Clear the cache for a specific city's event list.
      */
-    public function clearCityCache(string $city): void
+    public function clearCityCache(?string $city = null): void
     {
-        Cache::forget("events_city_{$city}");
+        Cache::forget("events_all");
+        Cache::forget("events_available_cities");
+        if ($city) {
+            Cache::forget("events_city_{$city}");
+        }
     }
 }

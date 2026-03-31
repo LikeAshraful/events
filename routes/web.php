@@ -7,9 +7,7 @@ use Inertia\Inertia;
 //     return Inertia::render('welcome');
 // })->name('home');
 
-Route::get('/', function () {
-    return redirect()->route('events.city', ['city' => 'new-york']); // Default redirect or home page
-});
+Route::get('/', [App\Http\Controllers\EventController::class, 'index'])->name('home');
 
 
 Route::get('/events/{city}', [App\Http\Controllers\EventController::class, 'index'])->name('events.city');

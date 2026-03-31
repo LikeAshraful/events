@@ -1,5 +1,5 @@
-import React from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
+import React, { FormEvent, useState } from 'react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 
@@ -10,8 +10,28 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Index({ events }) {
-    const { flash } = usePage().props;
+export default function Index({ events, filters }: any) {
+    const { flash } = usePage().props as any;
+
+    const [search, setSearch] = useState(filters?.search || '');
+    const [startDate, setStartDate] = useState(filters?.start_date || '');
+    const [endDate, setEndDate] = useState(filters?.end_date || '');
+
+    const applyFilters = (e: FormEvent) => {
+        e.preventDefault();
+        router.get('/admin/events', {
+            search,
+            start_date: startDate,
+            end_date: endDate,
+        }, { preserveState: true, replace: true });
+    };
+
+    const clearFilters = () => {
+        setSearch('');
+        setStartDate('');
+        setEndDate('');
+        router.get('/admin/events');
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -35,6 +55,58 @@ export default function Index({ events }) {
                             Add New Event
                         </Link>
                     </div>
+                </div>
+
+                {/* Filters Section */}
+                <div className="bg-white p-4 rounded-xl shadow-sm ring-1 ring-slate-900/5 mb-6">
+                    <form onSubmit={applyFilters} className="flex flex-col sm:flex-row gap-4 items-end">
+                        <div className="flex-1 w-full">
+                            <label htmlFor="search" className="block text-sm font-medium text-slate-700 mb-1">Search by Title</label>
+                            <input
+                                type="text"
+                                id="search"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="E.g., Tech Conference..."
+                                className="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                            />
+                        </div>
+                        <div className="w-full sm:w-48">
+                            <label htmlFor="start_date" className="block text-sm font-medium text-slate-700 mb-1">Start Date</label>
+                            <input
+                                type="date"
+                                id="start_date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                            />
+                        </div>
+                        <div className="w-full sm:w-48">
+                            <label htmlFor="end_date" className="block text-sm font-medium text-slate-700 mb-1">End Date</label>
+                            <input
+                                type="date"
+                                id="end_date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+                            />
+                        </div>
+                        <div className="flex gap-2 w-full sm:w-auto">
+                            <button
+                                type="submit"
+                                className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            >
+                                Filter
+                            </button>
+                            <button
+                                type="button"
+                                onClick={clearFilters}
+                                className="inline-flex justify-center rounded-md border border-slate-300 bg-white py-2 px-4 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 {/* Notifications */}
@@ -67,10 +139,10 @@ export default function Index({ events }) {
                             <tbody className="divide-y divide-slate-200 bg-white">
                                 {events.data.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" className="py-8 text-center text-slate-500 text-sm">No events found. Create one.</td>
+                                        <td colSpan={6} className="py-8 text-center text-slate-500 text-sm">No events found. Create one.</td>
                                     </tr>
                                 ) : (
-                                    events.data.map((event) => (
+                                    events.data.map((event: any) => (
                                         <tr key={event.id} className="hover:bg-slate-50 transition-colors">
                                             <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">
                                                 {event.title}
@@ -112,12 +184,33 @@ export default function Index({ events }) {
                     </div>
                 </div>
                 
-                {/* Pagination Controls (Basic) */}
-                <div className="mt-6 flex justify-between items-center text-sm text-slate-500">
+                {/* Pagination Controls */}
+                <div className="mt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-slate-500 gap-4">
                     <div>
-                        Showing <span className="font-medium">{events.data.length}</span> results.
+                        Showing <span className="font-medium">{events.from || 0}</span> to <span className="font-medium">{events.to || 0}</span> of <span className="font-medium">{events.total || 0}</span> results.
                     </div>
-                    {/* Add Inertia Pagination here based on your events.links if needed */}
+                    
+                    {events.links && events.links.length > 3 && (
+                        <div className="flex flex-wrap gap-1">
+                            {events.links.map((link: any, index: number) => (
+                                link.url ? (
+                                    <Link
+                                        key={index}
+                                        href={link.url}
+                                        preserveState
+                                        className={`px-3 py-1 rounded border min-w-[32px] text-center ${link.active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'}`}
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                    />
+                                ) : (
+                                    <span
+                                        key={index}
+                                        className="px-3 py-1 rounded border min-w-[32px] text-center bg-slate-50 text-slate-400 border-slate-300 cursor-not-allowed"
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
+                                    />
+                                )
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </AppLayout>
