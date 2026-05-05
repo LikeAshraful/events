@@ -68,6 +68,7 @@ class EventController extends Controller
             'start_datetime' => 'required|date',
             'end_datetime' => 'nullable|date|after_or_equal:start_datetime',
             'status' => ['required', Rule::in(['draft', 'published'])],
+            'featured' => 'boolean',
             'external_url' => 'required|url|starts_with:https://',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
@@ -104,6 +105,7 @@ class EventController extends Controller
             'start_datetime' => 'required|date',
             'end_datetime' => 'nullable|date|after_or_equal:start_datetime',
             'status' => ['required', Rule::in(['draft', 'published'])],
+            'featured' => 'boolean',
             'external_url' => 'required|url|starts_with:https://',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);

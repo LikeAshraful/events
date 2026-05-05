@@ -21,16 +21,46 @@ class EventController extends Controller
      * Display a listing of events by city.
      * Route: /events/{city}
      */
-    public function index(?string $city = null): Response
+    public function index(Request $request, ?string $city = null): Response
     {
         $parsedCity = $city ? strtolower($city) : null;
-        $events = $this->eventService->getEvents($parsedCity);
+        $search = $request->input('search');
+
+        $events = $this->eventService->getEvents($parsedCity, $search);
         $availableCities = $this->eventService->getAvailableCities();
+
+        // Get featured events for home page
+        $featuredEvents = null;
+        if (!$city) {
+            $featuredEvents = Event::where('status', 'published')
+                ->where('featured', true)
+                ->where('start_datetime', '>=', now())
+                ->orderBy('start_datetime', 'asc')
+                ->take(6)
+                ->get();
+        }
 
         return Inertia::render('Events/Index', [
             'city' => $city ? ucfirst($parsedCity) : null,
             'events' => $events,
             'availableCities' => $availableCities,
+            'search' => $search,
+            'featuredEvents' => $featuredEvents,
+        ]);
+    }
+
+    /**
+     * Display the specified event.
+     * Route: /event/{slug}
+     */
+    public function show(Event $event): Response
+    {
+        if ($event->status !== 'published') {
+            abort(404);
+        }
+
+        return Inertia::render('Events/Show', [
+            'event' => $event,
         ]);
     }
 

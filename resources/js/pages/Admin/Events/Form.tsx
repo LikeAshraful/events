@@ -16,7 +16,7 @@ export default function Form({ event = null }) {
             href: isEdit ? route('admin.events.edit', event.id) : route('admin.events.create'),
         },
     ];
-    
+
     // Format dates for input[type="datetime-local"]
     const formatDateForInput = (dateString) => {
         if (!dateString) return '';
@@ -33,6 +33,7 @@ export default function Form({ event = null }) {
         start_datetime: formatDateForInput(event?.start_datetime) || '',
         end_datetime: formatDateForInput(event?.end_datetime) || '',
         status: event?.status || 'draft',
+        featured: event?.featured || false,
         external_url: event?.external_url || '',
         banner: null, // Always handle file separately 
     });
@@ -41,7 +42,7 @@ export default function Form({ event = null }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
+
         // Use POST for files if method spoofing needed, but standard Inertia can handle it if we use multipart/form-data
         if (isEdit) {
             // Laravel needs _method for PUT when sending FormData, which is now in data
@@ -68,7 +69,7 @@ export default function Form({ event = null }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={isEdit ? 'Edit Event' : 'Create Event'} />
-            
+
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 selection:bg-indigo-500 selection:text-white">
                 <div className="mb-8">
                     <Link href={route('admin.events.index')} className="text-sm font-medium text-indigo-600 hover:text-indigo-500 flex items-center gap-1">
@@ -83,7 +84,7 @@ export default function Form({ event = null }) {
                         </h2>
 
                         <form onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">
-                            
+
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                                 {/* Title */}
                                 <div className="sm:col-span-2">
@@ -186,6 +187,31 @@ export default function Form({ event = null }) {
                                     {errors.status && <p className="mt-1 text-sm text-red-600">{errors.status}</p>}
                                 </div>
 
+                                {/* Featured */}
+                                <div className="sm:col-span-2">
+                                    <div className="flex items-center">
+                                        <input
+                                            id="featured"
+                                            type="checkbox"
+                                            checked={data.featured}
+                                            onChange={e => setData('featured', e.target.checked)}
+                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-600 border-slate-300 rounded"
+                                        />
+                                        <label htmlFor="featured" className="ml-3 block text-sm font-medium text-slate-700">
+                                            <span className="flex items-center">
+                                                Featured Event
+                                                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+                                                    ⭐ Premium
+                                                </span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <p className="mt-2 text-sm text-slate-500">
+                                        Featured events appear prominently on the homepage and get special highlighting.
+                                    </p>
+                                    {errors.featured && <p className="mt-1 text-sm text-red-600">{errors.featured}</p>}
+                                </div>
+
                                 {/* File Upload */}
                                 <div className="sm:col-span-2">
                                     <label className="block text-sm font-medium text-slate-700">Banner Image</label>
@@ -207,7 +233,7 @@ export default function Form({ event = null }) {
                             </div>
 
                             <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-end gap-x-6">
-                                <Link 
+                                <Link
                                     href={route('admin.events.index')}
                                     className="text-sm font-semibold leading-6 text-slate-900 hover:text-slate-600 transition-colors"
                                 >

@@ -22,6 +22,7 @@ class Event extends Model
         'status',
         'clicks',
         'source',
+        'featured',
     ];
 
     protected $casts = [

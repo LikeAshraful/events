@@ -24,6 +24,7 @@ class EventSeeder extends Seeder
                 'banner' => 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'external_url' => 'https://example.com/tech-conference',
                 'status' => 'published',
+                'featured' => true,
                 'clicks' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -39,6 +40,7 @@ class EventSeeder extends Seeder
                 'banner' => 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'external_url' => 'https://example.com/summer-fest',
                 'status' => 'published',
+                'featured' => true,
                 'clicks' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -54,6 +56,7 @@ class EventSeeder extends Seeder
                 'banner' => 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'external_url' => 'https://example.com/sf-meetup',
                 'status' => 'published',
+                'featured' => false,
                 'clicks' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -69,12 +72,18 @@ class EventSeeder extends Seeder
                 'banner' => 'https://images.unsplash.com/photo-1542204165-65bf26472b9b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
                 'external_url' => 'https://example.com/london-dev',
                 'status' => 'published',
+                'featured' => false,
                 'clicks' => 0,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
         ];
 
-        \App\Models\Event::insert($events);
+        foreach ($events as $eventData) {
+            \App\Models\Event::updateOrCreate(
+                ['slug' => $eventData['slug']],
+                $eventData
+            );
+        }
     }
 }

@@ -12,8 +12,20 @@ class EventService
      * Get published and upcoming events for a specific city.
      * Caches the results for 10 minutes to improve performance.
      */
-    public function getEvents(?string $city = null)
+    public function getEvents(?string $city = null, ?string $search = null)
     {
+        if ($search) {
+            $query = Event::published()->upcoming();
+            
+            if ($city) {
+                $query->where('city', $city);
+            }
+            
+            $query->where('title', 'like', '%' . $search . '%');
+            
+            return $query->get();
+        }
+
         $cacheKey = $city ? "events_city_{$city}" : "events_all";
 
         return Cache::remember($cacheKey, 600, function () use ($city) {

@@ -11,7 +11,17 @@ Route::get('/', [App\Http\Controllers\EventController::class, 'index'])->name('h
 
 
 Route::get('/events/{city}', [App\Http\Controllers\EventController::class, 'index'])->name('events.city');
+Route::get('/event/{event:slug}', [App\Http\Controllers\EventController::class, 'show'])->name('events.show');
 Route::get('/event/{event}/go', [App\Http\Controllers\EventController::class, 'redirect'])->name('events.redirect');
+
+// Static Pages
+Route::get('/about', [App\Http\Controllers\PageController::class, 'about'])->name('about');
+Route::get('/contact', [App\Http\Controllers\PageController::class, 'contact'])->name('contact');
+Route::get('/help', [App\Http\Controllers\PageController::class, 'help'])->name('help');
+Route::get('/privacy', [App\Http\Controllers\PageController::class, 'privacy'])->name('privacy');
+Route::get('/terms', [App\Http\Controllers\PageController::class, 'terms'])->name('terms');
+Route::get('/faq', [App\Http\Controllers\PageController::class, 'faq'])->name('faq');
+Route::get('/create-event', [App\Http\Controllers\PageController::class, 'createEvent'])->name('create-event');
 
 
 Route::middleware(['auth'])->group(function () {
