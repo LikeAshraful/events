@@ -10,8 +10,8 @@ export default function EventCard({ event }: any) {
     const formattedTime = startDate.toLocaleTimeString('en-US', timeOptions);
 
     const bannerUrl = event.banner 
-        ? `/storage/${event.banner}` 
-        : `https://via.placeholder.com/600x400?text=${encodeURIComponent(event.title)}`;
+    ? (event.banner.startsWith('http') ? event.banner : `/storage/${event.banner}`)
+    : `https://via.placeholder.com/600x400?text=${encodeURIComponent(event.title)}`;
 
     return (
         <div className="group relative flex flex-col bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 ease-out hover:-translate-y-1">

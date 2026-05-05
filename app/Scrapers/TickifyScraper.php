@@ -24,73 +24,65 @@ class TickifyScraper implements ScraperInterface
         ]);
 
         try {
-            // Request the actual events listing for Dhaka, Bangladesh
             $response = $client->get('events/');
             $html = $response->getBody()->getContents();
-
-
             $crawler = new Crawler($html);
-            Log::info($crawler->html());
-            
-        // Container for each event card
-        $crawler->filter('.isotope-item')->each(function (Crawler $node) use (&$events) {
-            try {
-                // Title – usually inside .eds-event-card-content__title
-                $title = $node->filter('.item_title')->count()
-                    ? trim($node->filter('.item_title h3')->text())
-                    : null;
+            logger($html);
+            $crawler->filter('.isotope-item')->each(function (Crawler $node) use (&$events) {
+                try {
 
-                // URL – anchor with .eds-event-card-content__action-link (or fallback to first <a>)
-                $url = $node->filter('a.strip_info')->count()
-                    ? $node->filter('a.strip_info')->attr('href')
-                    : $node->filter('a')->attr('href');
-                if ($url && !Str::startsWith($url, 'http')) {
-                    $url = rtrim($this->baseUrl, '/') . '/' . ltrim($url, '/');
-                }
+                    $title = $node->filter('.item_title')->count()
+                        ? trim($node->filter('.item_title h3')->text())
+                        : null;
 
-                // Date – often inside .eds-event-card-content__sub-title or .eds-text-bs--fixed
-                $dateText = $node->filter('.fw-normal')->count()
-                    ? trim($node->filter('.fw-normal')->text())
-                    : null;
-                $startDatetime = null;
-                if ($dateText) {
-                    try {
-                        $startDatetime = Carbon::parse($dateText)->toDateTimeString();
-                    } catch (Throwable $t) {
-                        Log::warning("Could not parse date '{$dateText}' for EventBrite");
+                    $url = $node->filter('a.strip_info')->count()
+                        ? $node->filter('a.strip_info')->attr('href')
+                        : $node->filter('a')->attr('href');
+                    if ($url && !Str::startsWith($url, 'http')) {
+                        $url = rtrim($this->baseUrl, '/') . '/' . ltrim($url, '/');
                     }
+
+                    
+                    $dateText = $node->filter('.fw-normal')->count()
+                        ? trim($node->filter('.fw-normal')->text())
+                        : null;
+                    $startDatetime = null;
+                    if ($dateText) {
+                        try {
+                            $startDatetime = Carbon::parse($dateText)->toDateTimeString();
+                        } catch (Throwable $t) {
+                            Log::warning("Could not parse date '{$dateText}' for Tickify");
+                        }
+                    }
+
+                    $venue = $node->filter('.event-location')->count()
+                        ? trim($node->filter('.event-location')->text())
+                        : null;
+
+                                        $banner = $node->filter('.strip figure img')->count()
+                        ? ($node->filter('.strip figure img')->attr('data-src') ?? $node->filter('.strip figure img')->attr('src'))
+                        : null;
+
+                    if ($title && $url && filter_var($url, FILTER_VALIDATE_URL)) {
+                        $events[] = [
+                            'title' => $title,
+                            'slug' => Str::slug($title) . '-' . uniqid(),
+                            'start_datetime' => $startDatetime ?? now()->toDateTimeString(),
+                            'venue' => $venue,
+                            'external_url' => $url,
+                            'source' => $this->sourceName,
+                            'status' => 'published',
+                            'city' => 'Dhaka',
+                            'banner' => $banner,
+                            'clicks' => 0,
+                        ];
+                    }
+                } catch (Throwable $e) {
+                    Log::error('Error parsing Tickify event node: ' . $e->getMessage());
                 }
+            });
 
-                // Venue – may be inside .card-text--truncated__one or .eds-event-card-content__sub-title (after date extraction)
-                $venue = $node->filter('.event-location')->count()
-                    ? trim($node->filter('.event-location')->text())
-                    : null;
-
-                $banner = $node->filter('.strip img')->count()
-                    ? $node->filter('.strip img')->attr('src')
-                    : null;
-
-                if ($title && $url && filter_var($url, FILTER_VALIDATE_URL)) {
-                    $events[] = [
-                        'title' => $title,
-                        'slug' => Str::slug($title) . '-' . uniqid(),
-                        'start_datetime' => $startDatetime ?? now()->toDateTimeString(),
-                        'venue' => $venue,
-                        'external_url' => $url,
-                        'source' => $this->sourceName,
-                        'status' => 'published',
-                        'city' => 'Dhaka',
-                        'banner' => $banner,
-                        'clicks' => 0,
-                    ];
-                }
-            } catch (Throwable $e) {
-                Log::error('Error parsing EventBrite event node: ' . $e->getMessage());
-            }
-        });
-
-        // Log the number of events we actually extracted for debugging
-        Log::info('TickifyScraper extracted ' . count($events) . ' events');                
+            Log::info('TickifyScraper extracted ' . count($events) . ' events');                
 
         } catch (Throwable $e) {
             Log::error("Failed to scrape {$this->sourceName}: " . $e->getMessage());
