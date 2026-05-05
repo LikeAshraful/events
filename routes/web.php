@@ -8,8 +8,7 @@ use Inertia\Inertia;
 // })->name('home');
 
 Route::get('/', [App\Http\Controllers\EventController::class, 'index'])->name('home');
-
-
+Route::get('/events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index');
 Route::get('/events/{city}', [App\Http\Controllers\EventController::class, 'index'])->name('events.city');
 Route::get('/event/{event:slug}', [App\Http\Controllers\EventController::class, 'show'])->name('events.show');
 Route::get('/event/{event}/go', [App\Http\Controllers\EventController::class, 'redirect'])->name('events.redirect');

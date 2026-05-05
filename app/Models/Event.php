@@ -39,11 +39,25 @@ class Event extends Model
     }
 
     /**
-     * Scope a query to sort events by nearest start datetime.
+     * Scope a query to only include featured events.
      */
+    public function scopeFeatured($query)
+    {
+        return $query->where('featured', true);
+    }
+
     public function scopeUpcoming($query)
     {
         return $query->where('start_datetime', '>=', now())
                      ->orderBy('start_datetime', 'asc');
+    }
+
+    /**
+     * Scope a query to include past events.
+     */
+    public function scopePast($query)
+    {
+        return $query->where('start_datetime', '<', now())
+                     ->orderBy('start_datetime', 'desc');
     }
 }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
 import EventCard from '../../components/EventCard';
 
-export default function Index({ city, events, availableCities = [], search = '', featuredEvents }: any) {
+export default function Index({ city, events, availableCities = [], search = '', featuredEvents, pastEvents }: any) {
     const [searchTerm, setSearchTerm] = useState(search);
 
     const submitFilter = (targetCity: string, targetSearch: string) => {
@@ -135,6 +135,27 @@ export default function Index({ city, events, availableCities = [], search = '',
                         {events.map((event: any) => (
                             <EventCard key={event.id} event={event} />
                         ))}
+                    </div>
+                )}
+
+                {/* Past Events Section - Only on Home Page */}
+                {!city && pastEvents && pastEvents.length > 0 && (
+                    <div className="mt-24 pt-24 border-t border-slate-200">
+                        <div className="flex items-center justify-between mb-8">
+                            <div>
+                                <h2 className="text-3xl font-bold text-slate-900 mb-2">Past Events</h2>
+                                <p className="text-slate-600">Take a look at the amazing experiences we've hosted</p>
+                            </div>
+                            <div className="hidden md:flex items-center space-x-2">
+                                <span className="text-sm font-medium text-slate-400">Memories</span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-75 grayscale-[0.5] hover:grayscale-0 transition-all duration-500">
+                            {pastEvents.map((event: any) => (
+                                <EventCard key={event.id} event={event} />
+                            ))}
+                        </div>
                     </div>
                 )}
             </main>

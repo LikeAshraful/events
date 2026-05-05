@@ -29,13 +29,18 @@ class EventController extends Controller
         $events = $this->eventService->getEvents($parsedCity, $search);
         $availableCities = $this->eventService->getAvailableCities();
 
-        // Get featured events for home page
+        // Get featured and past events for home page
         $featuredEvents = null;
+        $pastEvents = null;
         if (!$city) {
-            $featuredEvents = Event::where('status', 'published')
-                ->where('featured', true)
-                ->where('start_datetime', '>=', now())
-                ->orderBy('start_datetime', 'asc')
+            $featuredEvents = Event::published()
+                ->featured()
+                ->upcoming()
+                ->take(6)
+                ->get();
+            
+            $pastEvents = Event::published()
+                ->past()
                 ->take(6)
                 ->get();
         }
@@ -46,6 +51,7 @@ class EventController extends Controller
             'availableCities' => $availableCities,
             'search' => $search,
             'featuredEvents' => $featuredEvents,
+            'pastEvents' => $pastEvents,
         ]);
     }
 
@@ -59,8 +65,14 @@ class EventController extends Controller
             abort(404);
         }
 
+        $pastEvents = Event::published()
+            ->past()
+            ->take(5)
+            ->get();
+
         return Inertia::render('Events/Show', [
             'event' => $event,
+            'pastEvents' => $pastEvents,
         ]);
     }
 
