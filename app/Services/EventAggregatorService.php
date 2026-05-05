@@ -15,9 +15,9 @@ class EventAggregatorService
     {
         // Register your scrapers here
         $this->scrapers = [
-            new \App\Scrapers\ExampleScraper(),
-            new \App\Scrapers\EventBriteScraper(),
-            // Add MeetupScraper, EventbriteScraper, etc.
+            // new \App\Scrapers\ExampleScraper(),
+            // new \App\Scrapers\EventBriteScraper(),
+            new \App\Scrapers\TickifyScraper(),
         ];
     }
 
